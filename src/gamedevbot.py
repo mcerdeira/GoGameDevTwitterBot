@@ -24,7 +24,7 @@ def check_for_media(api):
         if fext in ('.jpg', '.gif', '.png'):
             print('%s found, posting on twitter...' % file)
             status = post_media(os.path.join(MEDIA_PATH, file), api)
-            print(status.text)
+            print('I posted %s' % status.text)
             media_archive(file)
     SCHED.enter(SECS, 1, check_for_media, (api, ))
     SCHED.run()
