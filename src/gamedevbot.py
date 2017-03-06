@@ -30,10 +30,12 @@ def check_for_media(api):
     SCHED.run()
 
 def media_archive(file):
+    if not os.path.exists(os.path.join(MEDIA_PATH, 'hist\\')): #TODO: history folder must be configurable?
         os.makedirs(os.path.join(MEDIA_PATH, 'hist\\'))
     os.rename(os.path.join(MEDIA_PATH, file), os.path.join(MEDIA_PATH, 'hist\\' + file))
 
 def post_media(media, api):
+    return api.PostUpdate('Ignore this tweet', media) #TODO: add logic for the tweet text
 
 def ask_config():
     consumer_key = input('Consumer Key:')
