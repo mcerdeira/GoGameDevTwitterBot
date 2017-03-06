@@ -21,7 +21,7 @@ def check_for_media(api):
     print('Checking for media in %s... (every %d secs)' % (MEDIA_PATH, SECS))
     for file in os.listdir(MEDIA_PATH):
         fname, fext = os.path.splitext(file)
-        if fext in ('.jpg', '.gif', '.png'):
+        if fext in ('.jpg', '.jpeg', '.gif', '.png', '.mp4'):
             print('%s found, posting on twitter...' % file)
             status = post_media(os.path.join(MEDIA_PATH, file), api)
             print('I posted %s' % status.text)
