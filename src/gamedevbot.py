@@ -8,6 +8,7 @@ import time
 import twitter
 
 SCHED = sched.scheduler(time.time, time.sleep)
+PROCESS_ONE = True;
 
 class ConfigFileObj:
     def __init__(self):
@@ -17,11 +18,13 @@ class ConfigFileObj:
         self.template_path = ''
 
 def _main(argv):
+    if len(argv) == 2 and argv[1] == 'process_one':
+        PROCESS_ONE = True
     cfg_file = Path('twitter.cfg')
     if not cfg_file.is_file():
         ask_config()
 
-    check_for_media(read_config())
+    check_for_media(read_config())    
 
 def check_for_media(config_obj):
     print('Checking for media in %s... (every %d secs)' % (config_obj.media_path, config_obj.secs))
@@ -32,8 +35,11 @@ def check_for_media(config_obj):
             status = post_media(os.path.join(config_obj.media_path, file), config_obj)
             print('I posted %s' % status.text)
             media_archive(file, config_obj)
+            if PROCESS_ONE:
+                break
     SCHED.enter(config_obj.secs, 1, check_for_media, (config_obj, ))
     SCHED.run()
+    print('Checking for media in %s... (every %d secs)' % (config_obj.media_path, config_obj.secs))
 
 def media_archive(file, config_obj):
     if not os.path.exists(os.path.join(config_obj.media_path, 'hist\\')): #TODO: history folder must be configurable?
