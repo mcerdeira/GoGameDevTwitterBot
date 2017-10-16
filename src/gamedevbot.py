@@ -8,7 +8,7 @@ import time
 import twitter
 
 SCHED = sched.scheduler(time.time, time.sleep)
-PROCESS_ONE = True;
+PROCESS_ONE = False;
 
 class ConfigFileObj:
     def __init__(self):
@@ -18,8 +18,14 @@ class ConfigFileObj:
         self.template_path = ''
 
 def _main(argv):
+    global PROCESS_ONE
     if len(argv) == 2 and argv[1] == 'process_one':
         PROCESS_ONE = True
+        
+    if len(argv) == 2 and argv[1] == 'help':
+        print('call gamedevbot with no arguments or process_one argument')
+        return ''
+        
     cfg_file = Path('twitter.cfg')
     if not cfg_file.is_file():
         ask_config()
@@ -27,19 +33,22 @@ def _main(argv):
     check_for_media(read_config())    
 
 def check_for_media(config_obj):
-    print('Checking for media in %s... (every %d secs)' % (config_obj.media_path, config_obj.secs))
+    global PROCESS_ONE
+    print('Checking for media in %s... (every %d secs) Process One: %r' % (config_obj.media_path, config_obj.secs, PROCESS_ONE))
     for file in os.listdir(config_obj.media_path):
         fname, fext = os.path.splitext(file)
         if fext in ('.jpg', '.jpeg', '.gif', '.png'):
             print('%s found, posting on twitter...' % file)
             status = post_media(os.path.join(config_obj.media_path, file), config_obj)
-            print('I posted %s' % status.text)
+            print('I posted %s' % status.text)            
             media_archive(file, config_obj)
             if PROCESS_ONE:
                 break
+    
+    if PROCESS_ONE:
+        print('Checking for media in %s... (every %d secs) Process One: %r' % (config_obj.media_path, config_obj.secs, PROCESS_ONE))
     SCHED.enter(config_obj.secs, 1, check_for_media, (config_obj, ))
-    SCHED.run()
-    print('Checking for media in %s... (every %d secs)' % (config_obj.media_path, config_obj.secs))
+    SCHED.run()    
 
 def media_archive(file, config_obj):
     if not os.path.exists(os.path.join(config_obj.media_path, 'hist\\')): #TODO: history folder must be configurable?
